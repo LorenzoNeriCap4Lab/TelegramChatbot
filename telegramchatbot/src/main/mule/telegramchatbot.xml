@@ -7,6 +7,7 @@ http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/cu
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
 http://www.mulesoft.org/schema/mule/tracing http://www.mulesoft.org/schema/mule/tracing/current/mule-tracing.xsd">
+	<os:object-store name="Object_store" doc:name="Object store" doc:id="aec2f79a-f609-4e04-8cee-a4be99ac8a96" />
 	<flow name="getUpdatesFlow" doc:id="487651f9-122b-411d-b59b-0086ee3fecd0" >
 		<scheduler doc:name="Scheduler" doc:id="c52228ec-7675-44c0-95b8-57b383c19549" >
 			<scheduling-strategy >
@@ -48,19 +49,61 @@ output application/java
 			</ee:message>
 		</ee:transform>
 		<logger level="INFO" doc:name="Logger" doc:id="f2b92c12-4070-4446-bd8c-70567b10165b" />
-		<os:retrieve doc:name="Retrieve" doc:id="5f427c87-d6c8-45f4-b05c-239ab55c8aff" key="stored_update_id" target="stored_updated_id">
-			<os:default-value><![CDATA[-1]]></os:default-value>
+		<os:retrieve doc:name="Retrieve" doc:id="5f427c87-d6c8-45f4-b05c-239ab55c8aff" key="stored_update_id" target="stored_updated_id" objectStore="Object_store">
 		</os:retrieve>
 		<choice doc:name="Choice" doc:id="3690a51a-9906-4970-ba7e-49896a9b24b5" >
 			<when expression="#[vars.stored_updated_id != payload.update_id]">
-				<os:store doc:name="Store" doc:id="d292a3f6-be79-4696-8484-b6f29ed9d2cf" key="stored_update_id">
-					<os:value ><![CDATA[#[payload.update_id]]]></os:value>
-				</os:store>
+				<flow-ref doc:name="Flow Reference" doc:id="1d7d7394-f2fb-467a-b89a-1a0bcd716ca4" name="handleNewUpdateFlow"/>
 			</when>
 			<otherwise >
-				<logger level="INFO" doc:name="Update Already Answered Logger" doc:id="49869db6-7581-4a2e-b126-575899f7daf1" message='#["The update with ID "+payload.update_id+" has been already answered"]'/>
+				<logger level="INFO" doc:name="Update Already Answered Logger" doc:id="49869db6-7581-4a2e-b126-575899f7daf1" message='#["The update with ID "++(payload.update_id as String)++" has been already answered"]'/>
 			</otherwise>
 			
 		</choice>
+	</flow>
+	<flow name="handleNewUpdateFlow" doc:id="c04533de-204d-403b-8357-dffdbd7ed418" >
+		<os:store doc:name="Store" doc:id="d292a3f6-be79-4696-8484-b6f29ed9d2cf" key="stored_update_id" objectStore="Object_store">
+					<os:value><![CDATA[#[payload.update_id]]]></os:value>
+				</os:store>
+		<choice doc:name="Choice" doc:id="877d8859-b1ca-409e-aa1d-d2e874b17efb" >
+			<when expression="#[payload.message.from.is_bot == false]">
+				<set-payload value='#[{ "chat_id": payload.message.chat.id, "user": payload.message.chat.first_name, "message_to_send": " you should have me write something like: "++(payload.message.text as String default "you wrote me nothing")}]' doc:name="Set Payload Message for user" doc:id="d1d7fdc0-9a6f-4ae8-9a79-f059e710f06c" />
+			</when>
+			<otherwise >
+				<set-payload value='#[{ "chat_id": payload.message.chat.id, "user": payload.message.chat.first_name, "message_to_send":" I do not speak with bots"}]' doc:name="Set Payload Message for bot" doc:id="75287c0a-8984-4c89-84d0-97d51dc136c5" />
+			</otherwise>
+		</choice>
+		<flow-ref doc:name="Flow Reference" doc:id="5919acd3-3f63-4c69-9223-45c5287cb512" name="sendMessageFlow"/>
+	</flow>
+	<flow name="sendMessageFlow" doc:id="cefec365-70f9-42f5-9f8a-71cd926510ca" >
+		<ee:transform doc:name="Transform Message" doc:id="3a4bdb5e-cdac-422c-a768-cb1b457ec2e4" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"chat_id": payload.chat_id,
+	"text": (payload.user as String) ++" "++(payload.message_to_send as String)
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<http:request method="POST" doc:name="Send Message Request" doc:id="ef226190-dfa0-4d0e-917f-f7fbd72c5b7e" config-ref="HTTP_Telegram_Request" path="bot${secure::telegram.api_key}${telegram.sendMessage}" >
+		</http:request>
+		<choice doc:name="Choice" doc:id="14a57444-ef75-4e96-a042-86d5369aa6f3" >
+			<when expression="#[payload.ok == false]" >
+				<raise-error doc:name="sendMessage Error" doc:id="d8fe32bc-c45b-4ae6-959e-52f03c8a9e0d" type="ANY" description="An error has occured during getting updates" />
+			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="Message Sent Logger" doc:id="398336d4-80c3-460f-b69f-735ca751ccbc" message="Message sent successfully" />
+			</otherwise>
+		</choice>
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="bc0a317c-b008-42de-97f7-a4f65ccd2d12" type="HTTP:CONNECTIVITY, HTTP:INTERNAL_SERVER_ERROR, HTTP:SERVICE_UNAVAILABLE, HTTP:TIMEOUT, HTTP:TOO_MANY_REQUESTS" >
+				<logger level="INFO" doc:name="HTTP connectivity errors" doc:id="b2512742-5576-4f2b-a023-ac5b94cfb749" message="An error has occured during request attempted to Telegram services" />
+			</on-error-continue>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="3fc633e3-5490-481e-823d-2f906acd8233" type="ANY" >
+				<logger level="INFO" doc:name="Error sendMessage Logger" doc:id="bb1f69a5-9a6b-41ba-a7eb-5660b694dfee" message="An error has occured during sending message to the user" />
+			</on-error-continue>
+		</error-handler>
 	</flow>
 </mule>

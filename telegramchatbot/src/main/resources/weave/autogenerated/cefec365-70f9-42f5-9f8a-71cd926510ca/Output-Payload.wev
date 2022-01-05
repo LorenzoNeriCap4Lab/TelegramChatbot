@@ -1,0 +1,5 @@
+%dw 2.0
+
+type auto_cefec365_70f9_42f5_9f8a_71cd926510ca_Output_Payload = {|  |} {"typeAlias": "Serializable",
+"typeId": "java.io.Serializable"}
+
