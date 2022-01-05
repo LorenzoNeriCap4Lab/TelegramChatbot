@@ -5,9 +5,11 @@
 	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
-	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="4253877f-8399-4ebe-b4e4-38568c39e9ff" file="secure_config.yaml" key="telegram" />
 	<configuration-properties doc:name="Configuration properties" doc:id="c017cb86-bec3-47cd-a7fa-47b2e17b0d97" file="telegramAPI_config.yaml" />
 	<http:request-config name="HTTP_Telegram_Request" doc:name="HTTP Request configuration" doc:id="178f2939-c537-4d8b-88ee-3bece10c1857" >
-		<http:request-connection protocol="HTTPS" host="${telegram.base_url}" />
+		<http:request-connection protocol="HTTPS" host="${telegram.base_url}"/>
 	</http:request-config>
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="6d53e7c1-782a-40fe-8d3c-57b3601664ba" file="secure_config.yaml" key="telegram" >
+		<secure-properties:encrypt algorithm="Blowfish" />
+	</secure-properties:config>
 </mule>

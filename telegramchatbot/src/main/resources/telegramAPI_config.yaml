@@ -1,5 +1,5 @@
 telegram:
-  base_url: "https://api.telegram.org/bot"
+  base_url: "api.telegram.org"
   getUpdates: "/getUpdates"
   sendMessage: "/sendMessage"
   

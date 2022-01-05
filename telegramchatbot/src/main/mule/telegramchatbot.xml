@@ -1,17 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns="http://www.mulesoft.org/schema/mule/core"
-	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
-http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
 	<flow name="telegramchatbotFlow" doc:id="487651f9-122b-411d-b59b-0086ee3fecd0" >
 		<scheduler doc:name="Scheduler" doc:id="c52228ec-7675-44c0-95b8-57b383c19549" >
 			<scheduling-strategy >
 				<fixed-frequency />
 			</scheduling-strategy>
 		</scheduler>
+		<http:request method="GET" doc:name="Request" doc:id="a9ded450-3ec1-4631-a581-d6207665dbef" config-ref="HTTP_Telegram_Request" path="bot${secure::telegram.api_key}${telegram.getUpdates}"/>
+		<logger level="INFO" doc:name="Logger" doc:id="f2b92c12-4070-4446-bd8c-70567b10165b" />
 		<os:retrieve doc:name="Retrieve" doc:id="5f427c87-d6c8-45f4-b05c-239ab55c8aff" key="update_id">
-			<os:default-value ><![CDATA[-1]]></os:default-value>
+			<os:default-value><![CDATA[-1]]></os:default-value>
 		</os:retrieve>
 	</flow>
 </mule>
