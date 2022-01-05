@@ -6,7 +6,7 @@
 http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-	<flow name="telegramchatbotFlow" doc:id="487651f9-122b-411d-b59b-0086ee3fecd0" >
+	<flow name="getUpdatesFlow" doc:id="487651f9-122b-411d-b59b-0086ee3fecd0" >
 		<scheduler doc:name="Scheduler" doc:id="c52228ec-7675-44c0-95b8-57b383c19549" >
 			<scheduling-strategy >
 				<fixed-frequency />
@@ -14,7 +14,10 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 		</scheduler>
 		<http:request method="GET" doc:name="Request" doc:id="a9ded450-3ec1-4631-a581-d6207665dbef" config-ref="HTTP_Telegram_Request" path="bot${secure::telegram.api_key}${telegram.getUpdates}"/>
 		<choice doc:name="Choice" doc:id="fa7837a9-c537-4a45-9bd8-2f8009a60558" >
-			<when expression="#[sizeOf(payload.result) &gt; 0]">
+			<when expression="#[payload.ok == false]">
+				<raise-error doc:name="getUpdates Error" doc:id="5958d17a-e026-4e7f-8b66-83ebad0a222d" type="GETUPDATES_ERROR" description="An error has occured during getting updates"/>
+			</when>
+			<when expression="#[sizeOf(payload.result) &gt; 0]" >
 				<ee:transform doc:name="Transform Message" doc:id="527cf2f9-4bc4-4149-a4a7-c5e5a32cb3b3">
 			<ee:message>
 				<ee:set-payload><![CDATA[%dw 2.0
@@ -33,9 +36,6 @@ output application/java
 		</os:retrieve>
 				<logger level="INFO" doc:name="Logger" doc:id="f2b92c12-4070-4446-bd8c-70567b10165b" />
 			</when>
-			<when expression="#[payload.ok == false]">
-				<raise-error doc:name="getUpdates Error" doc:id="5958d17a-e026-4e7f-8b66-83ebad0a222d" type="GETUPDATES_ERROR" description="An error has occured during getting updates"/>
-			</when>
 			<otherwise >
 				<logger level="INFO" doc:name="No new updates Logger" doc:id="be900b93-12ab-4e26-b577-4f42b01c4013" message="The chatbot has not received updates in the last 24 hours."/>
 			</otherwise>
@@ -49,4 +49,5 @@ output application/java
 			</on-error-continue>
 		</error-handler>
 	</flow>
+	<flow name="newUpdatesFlow" doc:id="bd82ccde-bd60-4f7d-90c8-45b4864575fa" />
 </mule>
