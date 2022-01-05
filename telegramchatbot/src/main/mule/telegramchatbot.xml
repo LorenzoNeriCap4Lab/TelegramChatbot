@@ -34,15 +34,18 @@ output application/java
 				<logger level="INFO" doc:name="Logger" doc:id="f2b92c12-4070-4446-bd8c-70567b10165b" />
 			</when>
 			<when expression="#[payload.ok == false]">
-				<raise-error doc:name="Raise error" doc:id="5958d17a-e026-4e7f-8b66-83ebad0a222d" type="GETUPDATES_ERROR" description="An error has occured during getting updates"/>
+				<raise-error doc:name="getUpdates Error" doc:id="5958d17a-e026-4e7f-8b66-83ebad0a222d" type="GETUPDATES_ERROR" description="An error has occured during getting updates"/>
 			</when>
 			<otherwise >
-				<logger level="INFO" doc:name="Logger" doc:id="be900b93-12ab-4e26-b577-4f42b01c4013" message="The chatbot has not received updates in the last 24 hours."/>
+				<logger level="INFO" doc:name="No new updates Logger" doc:id="be900b93-12ab-4e26-b577-4f42b01c4013" message="The chatbot has not received updates in the last 24 hours."/>
 			</otherwise>
 		</choice>
 		<error-handler >
 			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="b130d244-67a6-4445-9213-ff2e97db350d" type="GETUPDATES_ERROR">
-				<logger level="INFO" doc:name="Copy_of_Logger" doc:id="3cde7a1f-3437-495b-80fc-c4f24aaaab7b" message="The chatbot has not received updates in the last 24 hours." />
+				<logger level="INFO" doc:name="Error getUpdates Logger" doc:id="3cde7a1f-3437-495b-80fc-c4f24aaaab7b" message="The chatbot has not received updates in the last 24 hours." />
+			</on-error-continue>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="d3bc94c9-28e7-4fc5-b801-01078a4164b0" type="HTTP:CONNECTIVITY, HTTP:INTERNAL_SERVER_ERROR, HTTP:SERVICE_UNAVAILABLE, HTTP:TIMEOUT, HTTP:TOO_MANY_REQUESTS">
+				<logger level="INFO" doc:name="HTTP connectivity errors" doc:id="38d77d2a-524f-4818-b675-ccb909205a62" message="An error has occured during request attempted to Telegram services"/>
 			</on-error-continue>
 		</error-handler>
 	</flow>
