@@ -1,0 +1,22 @@
+#%RAML 1.0 DataType
+description: This object represents a Telegram Message
+type: object
+properties:
+  chat_id:
+    required: true
+    description: Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+    type: string
+  text:
+    required: true
+    description: Text of the message to be sent, 1-4096 characters after entities parsing
+    type: string
+    minLength: 1
+    maxLength: 4096
+  parse_mode?:
+    description: Mode for parsing entities in the message text. See formatting options for more details.
+    type: string
+  disable_web_page_preview?:
+    description: Disables link previews for links in this message
+    type: boolean
+
+
