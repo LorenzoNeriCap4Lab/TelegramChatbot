@@ -36,14 +36,25 @@ http://www.mulesoft.org/schema/mule/tracing http://www.mulesoft.org/schema/mule/
 		</error-handler>
 	</flow>
 	<flow name="newUpdatesFlow" doc:id="bd82ccde-bd60-4f7d-90c8-45b4864575fa" >
+		<ee:transform doc:name="Transform Message" doc:id="c1096536-f875-4139-86f2-5c131c18968e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	ok: payload.ok,
+	result: payload.result[-1]
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
 		<ee:transform doc:name="Transform Message" doc:id="527cf2f9-4bc4-4149-a4a7-c5e5a32cb3b3">
 			<ee:message>
 				<ee:set-payload><![CDATA[%dw 2.0
 output application/java
 ---
 {
-	"update_id": payload.result[-1].update_id,
-	"message": payload.result[-1].message
+	"update_id": payload.result.update_id,
+	"message": payload.result.message
 	
 }]]></ee:set-payload>
 			</ee:message>

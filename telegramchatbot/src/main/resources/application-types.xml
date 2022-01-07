@@ -127,6 +127,42 @@ type auto_cefec365_70f9_42f5_9f8a_71cd926510ca_Output_Variables_stored_updated_i
 
 ]]></types:shape>
     </types:type>
+    <types:type name="TelegramUpdate" format="json">
+      <types:shape format="weave" example="TelegramUpdateExample.json"><![CDATA[%dw 2.0
+
+type TelegramUpdate = {|
+  ok: Boolean, 
+  result: {|
+    message_id: Number {"typeId": "int"}, 
+    from: {|
+      id: Number {"typeId": "int"}, 
+      is_bot: Boolean, 
+      first_name: String, 
+      username: String
+    |}, 
+    chat: {|
+      id: Number {"typeId": "int"}, 
+      first_name: String, 
+      username: String, 
+      "type": String
+    |}, 
+    date: Number {"typeId": "int"}, 
+    text: String
+  |}
+|} {"example": "{\\\"ok\\\":true,\\\"result\\\":{\\\"message_id\\\":80,\\\"from\\\":{\\\"id\\\":1838500423,\\\"is_bot\\\":true,\\\"first_name\\\":\\\"canalelorenzo\\\",\\\"username\\\":\\\"canalelorenzobot\\\"},\\\"chat\\\":{\\\"id\\\":178041385,\\\"first_name\\\":\\\"Lorenzo\\\",\\\"username\\\":\\\"Istorn\\\",\\\"type\\\":\\\"private\\\"},\\\"date\\\":1641372333,\\\"text\\\":\\\"ciao come te la passi?\\\"}}"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="TelegramUpdates" format="json">
+      <types:shape format="weave" example="TelegramUpdatesExample.json"><![CDATA[%dw 2.0
+
+type TelegramUpdates = {|
+  ok: Boolean, 
+  result: Array<{|    update_id: Number {"typeId": "int"},     message: {|      message_id: Number {"typeId": "int"},       from: {|        id: Number {"typeId": "int"},         is_bot: Boolean,         first_name: String,         username: String,         language_code: String      |},       chat: {|        id: Number {"typeId": "int"},         first_name: String,         username: String,         "type": String      |},       date: Number {"typeId": "int"},       text: String    |}  |}>
+|} {"example": "{\\\"ok\\\":true,\\\"result\\\":[{\\\"update_id\\\":669548182,\\\"message\\\":{\\\"message_id\\\":81,\\\"from\\\":{\\\"id\\\":178041385,\\\"is_bot\\\":false,\\\"first_name\\\":\\\"Lorenzo\\\",\\\"username\\\":\\\"Istorn\\\",\\\"language_code\\\":\\\"en\\\"},\\\"chat\\\":{\\\"id\\\":178041385,\\\"first_name\\\":\\\"Lorenzo\\\",\\\"username\\\":\\\"Istorn\\\",\\\"type\\\":\\\"private\\\"},\\\"date\\\":1641374513,\\\"text\\\":\\\"ehil\u00F9\\\"}}]}"}
+
+]]></types:shape>
+    </types:type>
   </types:catalog>
   <types:enrichment select="#bd82ccde-bd60-4f7d-90c8-45b4864575fa">
     <types:processor-declaration>
@@ -186,6 +222,24 @@ type auto_cefec365_70f9_42f5_9f8a_71cd926510ca_Output_Variables_stored_updated_i
           <types:variable name="stored_updated_id" type="auto_cefec365-70f9-42f5-9f8a-71cd926510ca_Output-Variables-stored_updated_id"/>
         </types:variables>
       </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#527cf2f9-4bc4-4149-a4a7-c5e5a32cb3b3">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="TelegramUpdate"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#c1096536-f875-4139-86f2-5c131c18968e">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="TelegramUpdates"/>
+        </types:message>
+      </types:input-event>
     </types:processor-declaration>
   </types:enrichment>
 </types:mule>

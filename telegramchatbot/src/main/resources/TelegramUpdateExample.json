@@ -1,0 +1,21 @@
+      
+{
+  "ok": true,
+  "result": {
+    "message_id": 80,
+    "from": {
+      "id": 1838500423,
+      "is_bot": true,
+      "first_name": "canalelorenzo",
+      "username": "canalelorenzobot"
+    },
+    "chat": {
+      "id": 178041385,
+      "first_name": "Lorenzo",
+      "username": "Istorn",
+      "type": "private"
+    },
+    "date": 1641372333,
+    "text": "ciao come te la passi?"
+  }
+}
